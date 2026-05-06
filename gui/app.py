@@ -533,12 +533,24 @@ class Application:
         tk.Label(top2, text='   Парсер:', bg=CLR['panel'],
                  fg=CLR['text2'], font=FT_SMALL).pack(side='left')
         self._sem_parser_var = tk.StringVar(value='natasha')
-        for _val, _lbl in [('natasha', 'natasha'), ('stanza', 'stanza')]:
+        for _val, _lbl in [('natasha', 'natasha'), ('stanza', 'stanza'),
+                            ('groq', 'Groq (Gemma 2)')]:
             tk.Radiobutton(top2, text=_lbl, variable=self._sem_parser_var, value=_val,
                            bg=CLR['panel'], fg=CLR['text'], selectcolor=CLR['bg'],
                            activebackground=CLR['panel'], activeforeground=CLR['text'],
                            font=FT_SMALL,
-                           command=self._draw_semantic_graph).pack(side='left', padx=2)
+                           command=self._on_parser_change).pack(side='left', padx=2)
+
+        # Статус ключа (показывается только при выборе Groq)
+        self._groq_key_frame = tk.Frame(top2, bg=CLR['panel'])
+        from core.llm_semantics import is_api_key_set
+        _key_ok  = is_api_key_set()
+        _key_txt = '🔑 ключ загружен' if _key_ok else '⚠ GROQ_API_KEY не задан в .env'
+        _key_clr = '#A6E3A1'          if _key_ok else '#F38BA8'
+        self._groq_key_lbl = tk.Label(self._groq_key_frame, text=_key_txt,
+                                      bg=CLR['panel'], fg=_key_clr, font=FT_SMALL)
+        self._groq_key_lbl.pack(side='left', padx=(8, 0))
+
         tk.Label(top2, text='  ', bg=CLR['panel']).pack(side='left')
         self._sem_similarity_var = tk.BooleanVar(value=False)
         tk.Checkbutton(top2, text='Сходство (sentence-transformers)',
@@ -637,6 +649,17 @@ class Application:
             self._sem_combo.current(0)
         self._draw_semantic_graph()
 
+    def _toggle_groq_ui(self):
+        if getattr(self, '_sem_parser_var', None) and self._sem_parser_var.get() == 'groq':
+            self._groq_key_frame.pack(side='left', padx=(6, 0))
+        else:
+            self._groq_key_frame.pack_forget()
+
+    def _on_parser_change(self):
+        self._toggle_groq_ui()
+        if self._sem_parser_var.get() != 'groq':
+            self._draw_semantic_graph()
+
     def _draw_semantic_graph(self):
         if not self._sem_sentences_ref:
             return
@@ -644,8 +667,33 @@ class Application:
         if idx < 0:
             return
 
-        use_stanza = (getattr(self, '_sem_parser_var', None) is not None
-                      and self._sem_parser_var.get() == 'stanza')
+        parser = (getattr(self, '_sem_parser_var', None) or tk.StringVar(value='natasha')).get()
+
+        # ── Groq (LLM) ───────────────────────────────────────────────────────
+        if parser == 'groq':
+            from core.llm_semantics import analyze_with_groq, is_groq_available, is_api_key_set
+            if not is_groq_available():
+                messagebox.showwarning('Groq',
+                    'Пакет groq не установлен.\nВыполните: pip install groq')
+                return
+            if not is_api_key_set():
+                messagebox.showwarning('Groq',
+                    'GROQ_API_KEY не задан.\n'
+                    'Добавьте строку  GROQ_API_KEY=ваш_ключ  в файл .env в корне проекта.')
+                return
+            sent_text = self._sem_sentences_ref[idx].text
+            if hasattr(self, '_sem_fulltext_var'):
+                self._sem_fulltext_var.set(sent_text)
+            try:
+                self._sem_graph = analyze_with_groq(sent_text)
+            except Exception as ex:
+                messagebox.showerror('Groq', f'Ошибка API:\n{ex}')
+                return
+            self._sem_similarities = {}
+            self._render_graph(self._sem_graph)
+            return
+
+        use_stanza = parser == 'stanza'
         if use_stanza:
             from core.stanza_bridge import get_stanza_sentences, is_stanza_available
             if not is_stanza_available():
