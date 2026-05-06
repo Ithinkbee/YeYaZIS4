@@ -16,7 +16,7 @@ from core.semantics import (
     SEM_LABELS, ROLE_EDGE, SUBJ_ROLES,
 )
 
-GROQ_MODEL = 'gemma2-9b-it'
+GROQ_MODEL = 'llama-3.3-70b-versatile'
 
 _VALID_ROLES = set(SEM_LABELS.keys()) - {'PREDICATE', 'CONJUNCT'}
 

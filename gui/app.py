@@ -1479,12 +1479,11 @@ class Application:
             return fig
 
         charts = [
-            ('⏱  Время анализа (мс)',    'Запуск №', 'мс',
+            ('Время анализа (мс)',       'Запуск №', 'мс',
              labels, elapsed, '#CBA6F7', False),
-            ('📝  Слов в тексте',          'Запуск №', 'слов',
+            ('Слов в тексте',            'Запуск №', 'слов',
              labels, words,   CLR['blue'],  True),
-            ('⚡  Скорость обработки (сл/с)',
-             'Запуск №', 'слов/с',
+            ('Скорость обработки (сл/с)', 'Запуск №', 'слов/с',
              labels,
              [round(w / (e/1000), 1) if e > 0 else 0 for e, w in zip(elapsed, words)],
              CLR['green'], False),
@@ -1492,7 +1491,7 @@ class Application:
         # Добавляем график размера файла только если хотя бы одно ненулевое значение
         if any(s > 0 for s in filesizes):
             charts.append((
-                '📂  Размер файла (КБ)', 'Запуск №', 'КБ',
+                'Размер файла (КБ)', 'Запуск №', 'КБ',
                 labels, filesizes, CLR['yellow'], True
             ))
 
