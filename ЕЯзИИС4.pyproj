@@ -1,0 +1,72 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>0fe4a5bd-96bf-4980-9e74-9d613eea0ecd</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>main.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>ЕЯзИИС4</Name>
+    <RootNamespace>ЕЯзИИС4</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="core\analyzer.py" />
+    <Compile Include="core\auth.py" />
+    <Compile Include="core\database.py" />
+    <Compile Include="core\exporter.py" />
+    <Compile Include="core\feats_ru.py" />
+    <Compile Include="core\loader.py" />
+    <Compile Include="core\quiz.py" />
+    <Compile Include="core\semantics.py" />
+    <Compile Include="core\sentiment.py" />
+    <Compile Include="core\shop.py" />
+    <Compile Include="core\__init__.py" />
+    <Compile Include="gui\app.py" />
+    <Compile Include="gui\styles.py" />
+    <Compile Include="gui\__init__.py" />
+    <Compile Include="main.py" />
+    <Compile Include="__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ЛАБ4\" />
+    <Folder Include="core\" />
+    <Folder Include="core\__pycache__\" />
+    <Folder Include="gui\" />
+    <Folder Include="gui\__pycache__\" />
+    <Folder Include="tests\" />
+    <Folder Include="__pycache__\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="core\__pycache__\analyzer.cpython-314.pyc" />
+    <Content Include="core\__pycache__\database.cpython-314.pyc" />
+    <Content Include="core\__pycache__\loader.cpython-314.pyc" />
+    <Content Include="core\__pycache__\quiz.cpython-314.pyc" />
+    <Content Include="core\__pycache__\__init__.cpython-314.pyc" />
+    <Content Include="gui\__pycache__\app.cpython-314.pyc" />
+    <Content Include="gui\__pycache__\__init__.cpython-314.pyc" />
+    <Content Include="README.md" />
+    <Content Include="requirements.txt" />
+    <Content Include="tests\test_doc_1.docx" />
+    <Content Include="__pycache__\compat.cpython-314.pyc" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

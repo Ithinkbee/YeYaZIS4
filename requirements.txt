@@ -1,0 +1,28 @@
+# СинтАналитик — зависимости Python
+# Установка: pip install -r requirements.txt
+
+# Ядро NLP
+natasha>=1.6.0
+pymorphy2>=0.9.1
+
+# Работа с документами
+python-docx>=1.0.0        # .docx
+pdfplumber>=0.10.0         # .pdf (опционально)
+striprtf>=0.0.26           # .rtf (опционально)
+beautifulsoup4>=4.12.0     # .html (опционально)
+
+# Визуализация
+matplotlib>=3.7.0
+
+# База данных
+psycopg2-binary>=2.9.0
+
+# Тональность (опционально — требует fasttext-wheel)
+# dostoevsky>=0.6.0
+# fasttext-wheel>=0.9.2
+
+# Улучшенный парсинг зависимостей (опционально, ~165 MB модель)
+stanza>=1.9.0
+
+# Семантическая близость (опционально, ~120 MB модель)
+sentence-transformers>=3.0.0
