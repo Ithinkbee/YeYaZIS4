@@ -534,7 +534,7 @@ class Application:
                  fg=CLR['text2'], font=FT_SMALL).pack(side='left')
         self._sem_parser_var = tk.StringVar(value='natasha')
         for _val, _lbl in [('natasha', 'natasha'), ('stanza', 'stanza'),
-                            ('groq', 'Groq (Gemma 2)')]:
+                            ('groq', 'Groq (LLaMA 3)')]:
             tk.Radiobutton(top2, text=_lbl, variable=self._sem_parser_var, value=_val,
                            bg=CLR['panel'], fg=CLR['text'], selectcolor=CLR['bg'],
                            activebackground=CLR['panel'], activeforeground=CLR['text'],
@@ -551,14 +551,15 @@ class Application:
                                       bg=CLR['panel'], fg=_key_clr, font=FT_SMALL)
         self._groq_key_lbl.pack(side='left', padx=(8, 0))
 
-        tk.Label(top2, text='  ', bg=CLR['panel']).pack(side='left')
+        # Чекбокс семантического сходства (показывается только для stanza)
+        self._sem_sim_frame = tk.Frame(top2, bg=CLR['panel'])
         self._sem_similarity_var = tk.BooleanVar(value=False)
-        tk.Checkbutton(top2, text='Сходство (sentence-transformers)',
+        tk.Checkbutton(self._sem_sim_frame, text='Сходство (sentence-transformers)',
                        variable=self._sem_similarity_var,
                        bg=CLR['panel'], fg=CLR['text'], selectcolor=CLR['bg'],
                        activebackground=CLR['panel'], activeforeground=CLR['text'],
                        font=FT_SMALL,
-                       command=self._draw_semantic_graph).pack(side='left', padx=(6, 4))
+                       command=self._draw_semantic_graph).pack(side='left')
 
         # ── Строка с полным текстом предложения ──────────────────────────────
         ft_row = tk.Frame(tab, bg=CLR['panel'], padx=12, pady=5)
@@ -570,28 +571,34 @@ class Application:
                  bg=CLR['panel'], fg=CLR['text'], font=FT_SMALL,
                  anchor='w', justify='left', wraplength=1100).pack(side='left', fill='x', expand=True)
 
-        # ── Легенда ──────────────────────────────────────────────────────────
-        leg = tk.Frame(tab, bg=CLR['bg'], pady=4)
-        leg.pack(fill='x', padx=12)
-        for label, color in [
-            ('Агент',        '#89B4FA'),
-            ('Действие',     '#F9E2AF'),
-            ('Объект',       '#A6E3A1'),
-            ('Получатель',   '#89DCEB'),
-            ('Признак',      '#F38BA8'),
-            ('Место',        '#94E2D5'),
-            ('Время',        '#FAB387'),
-            ('Цель',         '#CBA6F7'),
-            ('Причина',      '#EBA0AC'),
-            ('Образ д.',     '#B4BEFE'),
-            ('Принадл.',     '#F5C2E7'),
-            ('Обст.',        '#A6ADC8'),
-        ]:
-            f = tk.Frame(leg, bg=color, padx=6, pady=2)
-            f.pack(side='left', padx=4)
-            tk.Label(f, text=label, bg=color, fg='#1E1E2E', font=FT_SMALL).pack()
-        tk.Label(leg, text=' ✋ Тащите узлы мышью  |  🖱 колёсико = масштаб  |  ПКМ = панорама',
-                 bg=CLR['bg'], fg=CLR['text2'], font=FT_SMALL).pack(side='left', padx=12)
+        # ── Легенда (два ряда — все роли) ────────────────────────────────────
+        _LEG_ROWS = [
+            # ряд 1: участники события
+            [('Действие',  '#F9E2AF'), ('Агент',     '#89B4FA'),
+             ('Каузатор',  '#FF9E64'), ('Объект',    '#A6E3A1'),
+             ('Тема',      '#94E2D5'), ('Получатель','#89DCEB'),
+             ('Бенефиц.',  '#CBA6F7'), ('Пережив.',  '#D4B8FF'),
+             ('Стимул',    '#FFE08A'), ('Инструмент','#E8C99A'),
+             ('Признак',   '#F38BA8'), ('Принадл.',  '#F5C2E7')],
+            # ряд 2: обстоятельства + подсказка
+            [('Место',     '#82D4C8'), ('Источник',  '#FFA07A'),
+             ('Направл.',  '#B5EAD7'), ('Время',     '#FAB387'),
+             ('Цель',      '#CBA6F7'), ('Причина',   '#EBA0AC'),
+             ('Образ д.',  '#B4BEFE'), ('Совместн.', '#9CE8E0'),
+             ('Обст.',     '#A6ADC8')],
+        ]
+        leg_wrap = tk.Frame(tab, bg=CLR['bg'], pady=2)
+        leg_wrap.pack(fill='x', padx=12)
+        for row_items in _LEG_ROWS:
+            leg_row = tk.Frame(leg_wrap, bg=CLR['bg'])
+            leg_row.pack(fill='x', pady=1)
+            for label, color in row_items:
+                f = tk.Frame(leg_row, bg=color, padx=5, pady=1)
+                f.pack(side='left', padx=2)
+                tk.Label(f, text=label, bg=color, fg='#1E1E2E', font=FT_MINI).pack()
+        tk.Label(leg_wrap,
+                 text=' ✋ Тащите узлы мышью  |  🖱 колёсико = масштаб  |  ПКМ = панорама',
+                 bg=CLR['bg'], fg=CLR['text2'], font=FT_SMALL).pack(anchor='w', padx=2, pady=(2, 0))
 
         # ── Canvas с прокруткой ───────────────────────────────────────────────
         cf = tk.Frame(tab, bg=CLR['bg'])
@@ -650,10 +657,19 @@ class Application:
         self._draw_semantic_graph()
 
     def _toggle_groq_ui(self):
-        if getattr(self, '_sem_parser_var', None) and self._sem_parser_var.get() == 'groq':
+        parser = getattr(self, '_sem_parser_var', None)
+        p = parser.get() if parser else 'natasha'
+        # Статус Groq-ключа
+        if p == 'groq':
             self._groq_key_frame.pack(side='left', padx=(6, 0))
         else:
             self._groq_key_frame.pack_forget()
+        # Чекбокс семантического сходства — только для stanza
+        if p == 'stanza':
+            self._sem_sim_frame.pack(side='left', padx=(8, 4))
+        else:
+            self._sem_similarity_var.set(False)
+            self._sem_sim_frame.pack_forget()
 
     def _on_parser_change(self):
         self._toggle_groq_ui()
